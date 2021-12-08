@@ -8,5 +8,13 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-<p>Welcome, {{user}}</p>
+<p class="col-md-6 offset-md-3 text-center" >Welcome, {{user}}</p>
+<div class="container mt-5 mb-5 px-10 ">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 text-center">
+            <h4>You have not added any notes</h4>
+            <a href="/notes/new" class="btn btn-primary"> Add note </a>
+        </div>
+    </div>
+</div>
 {% endblock %}
