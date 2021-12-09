@@ -1,16 +1,21 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from flask_bcrypt import Bcrypt
 import os
 import datetime 
 
 
 app = Flask(__name__)
 
+bcrypt = Bcrypt(app)
+
 host = os.environ.get('DB_URL')
 client = MongoClient(host=host)
 db = client.notesapp
 notes = db.notes
+users = db.user
+records = db.register
 
 
 app.secret_key = "bdqsrmf2"
@@ -81,6 +86,16 @@ def notes_delete(notes_id):
 
 # USER INFO -----------------------------------------------------------------------------
 
+def logged_in():
+    return session.get('username') and session.get('password')
+def current_user():
+    found_user = users.find_one({
+        'username':session.get('username'),
+        'password':session.get('password')
+    })
+    return found_user
+
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == 'POST':
@@ -100,8 +115,9 @@ def login():
 
 @app.route("/user")
 def user():
-    if "user" in session:
-        user = session["user"]
+    if logged_in:
+        user = current_user()
+
         return render_template("user.html", user=user, notes=notes.find())
     else:
         flash("You are not logged in!")
