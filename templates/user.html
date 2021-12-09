@@ -1,20 +1,45 @@
 {% extends "base.html" %}
 {% block title %} User {% endblock %}
+
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for msg in messages %}
-                <p> {{msg}} </p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-<p class="col-md-6 offset-md-3 text-center" >Welcome, {{user}}</p>
-<div class="container mt-5 mb-5 px-10 ">
-    <div class="row">
-        <div class="col-md-6 offset-md-3 text-center">
-            <h4>You have not added any notes</h4>
-            <a href="/notes/new" class="btn btn-primary"> Add note </a>
+    {% include 'partials/flash.html' %}
+
+    <p class="col-md-6 offset-md-3 text-center" >Welcome, {{user}}</p>
+    <div class="container mt-5 mb-5 px-10 ">
+        <div class="row">
+            <div class="col-md-6 offset-md-3 text-center">
+                <a href="/notes/new" class="btn btn-primary"> Add note </a>
+            </div>
         </div>
     </div>
-</div>
+
+
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">test</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+          <p class="card-text">test</p>
+          <a href="#" class="card-link">Card link</a>
+          <a href="#" class="card-link">Another link</a>
+        </div>
+    </div>
+
+
+
+    <!-- <div>
+        {% for note in notes %}
+
+        <div class="card mt-5 justify-content-center" >
+            <div class="card-body">
+                
+              <h5 class="card-title">adad</h5>
+              <h6 class="card-subtitle mb-2 text-muted">{{ note.created }}</h6>
+              <p class="card-text">test</p>
+              
+            </div>
+        </div>
+
+        {% endfor %}
+    </div> -->
+
 {% endblock %}
