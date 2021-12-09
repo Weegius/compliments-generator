@@ -21,10 +21,12 @@
                     <h5 class="card-title">{{ note.name }}</h5>
                     <!-- <h6 class="card-subtitle mb-2 text-muted">{{ note.created }}</h6> -->
                     <p class="card-text">{{ note.content }}</p>
-                    <a class='card-link' href="/notes/{{ note._id }}/edit"> Edit </a>
-                    <form method='POST' action='/notes/{{ note._id }}/delete'>
-                        <a class='card-link' type='submit'>Delete</a>
-                    </form>
+
+                    <a class='btn btn-primary' href="/notes/{{ note._id }}/edit" role="button"> Edit </a>
+
+                    <p><form method='POST' action='/notes/{{ note._id }}/delete'>
+                        <button class='btn btn-primary' type='submit'>Delete</button>
+                    </form></p>
                     
                 </div>
             </div>

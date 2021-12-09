@@ -12,14 +12,23 @@
                 <h1 class="fw-bolder">Note</h1>
             </div>
             <div class="row gx-5 justify-content-center">
-                <div class="col-lg-8 col-xl-6">
-                    <form method="POST" action="/notes">
-                    <p>Note Name </p>
-                    <p><input type="text" value="" name="dname" /></p>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="desc"></textarea>
-                    <p><input class="btn btn-primary mt-2" type="submit" value="submit" /> </p>
-                    </form>
-                </div>
+                <form method='POST' action='/notes/{{note._id}}'>
+                    <input type='hidden' name='_method' value='PUT'/>
+                    <div class='form-group'>
+                        <label for='note-title'>Title</label><br>
+                        <input class='form-control' id='note-title' type='text' name='title' value='{{ note.name }}'/>
+                    </div>
+                
+                    <!-- DESCRIPTION -->
+                    <div class='form-group'>
+                        <label for='description'>Content</label><br>
+                        <input class='form-control' id='description' type='text' name='description' value='{{ note.content }}' />
+                    </div>
+                    <!-- BUTTON -->
+                    <div class='form-group'>
+                        <button class='btn btn-primary' type='submit'>Save Note</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
