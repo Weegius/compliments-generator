@@ -36,7 +36,7 @@ def notes_new():
     return render_template('notes_new.html', title='New Note')
 
 
-''' SUBMIT A NEW PLAYLIST ------------------------------------------------- '''
+''' SUBMIT A NEW NOTE ------------------------------------------------- '''
 @app.route("/notes", methods=['POST'])
 def notes_submit():
     note = {
@@ -47,7 +47,7 @@ def notes_submit():
     notes.insert_one(note)
     return redirect(url_for('home'))
 
-''' SHOW A PLAYLIST ------------------------------------------------- '''
+''' SHOW A NOTE ------------------------------------------------- '''
 # @app.route('/playlists/<playlist_id>')  
 # def playlists_show(playlist_id):
 #     """Show a single playlist."""
@@ -55,14 +55,14 @@ def notes_submit():
 #     playlist_comments = comments.find({'playlist_id': playlist_id})
 #     return render_template('playlists_show.html', playlist=playlist, comments=playlist_comments)
 
-''' EDIT A PLAYLIST  '''
+''' EDIT A NOTE  '''
 @app.route("/notes/<notes_id>/edit")
 def notes_edit(notes_id):
     note = notes.find_one({'_id': ObjectId(notes_id)})
     return render_template('notes_edit.html', note=note, title='Edit Playlist')
 
 
-''' SUBMIT THE EDITED PLAYLIST ------------------------------------------------- '''
+''' SUBMIT THE EDITED NOTE ------------------------------------------------- '''
 @app.route("/notes/<note_id>", methods=['POST'])
 def notes_update(notes_id):
     updated_note = {
@@ -76,13 +76,19 @@ def notes_update(notes_id):
         {'$set': updated_note})
     return redirect(url_for('user.html', notes_id=notes_id, title='Edit Playlist'))
 
-''' DELETE A PLAYLIST ------------------------------------------------- '''
+''' DELETE A NOTE ------------------------------------------------- '''
 
 @app.route("/notes/<notes_id>/delete", methods=['POST'])
 def notes_delete(notes_id):
-    """Delete one playlist."""
     notes.delete_one({'_id': ObjectId(notes_id)})
     return redirect(url_for('user'))
+
+
+
+
+
+
+    
 
 # USER INFO -----------------------------------------------------------------------------
 
@@ -94,6 +100,7 @@ def current_user():
         'password':session.get('password')
     })
     return found_user
+
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -113,15 +120,16 @@ def login():
 
         return render_template('login.html')
 
+
 @app.route("/user")
 def user():
-    if logged_in:
-        user = current_user()
-
+    if "user" in session:
+        user = session["user"]
         return render_template("user.html", user=user, notes=notes.find())
     else:
         flash("You are not logged in!")
         return redirect(url_for("login"), notes=notes.find())
+
 
 
 @app.route("/logout")
