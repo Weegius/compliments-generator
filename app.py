@@ -12,6 +12,7 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 host = os.environ.get('DB_URL')
+app.secret_key = os.environ.get('SKEY')
 client = MongoClient(host=host)
 
 # app.config["MONGO_URI"] = "mongodb://localhost:27017/myDatabase"
@@ -22,7 +23,7 @@ notes = db.notes
 
 users = db.user
 
-app.secret_key = "bdqsrmf2"
+# app.secret_key = "bdqsrmf2"
 # app.permanent_session_lifetime = timedelta(minutes=30)
 
 
