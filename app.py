@@ -54,7 +54,7 @@ def notes_submit():
         'user_id': _id
     }
     notes.insert_one(note)
-    return redirect(url_for('home'))
+    return redirect(url_for('user'))
 
 ''' EDIT A NOTE  '''
 @app.route("/notes/<notes_id>/edit")
