@@ -1,9 +1,10 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from pymongo import MongoClient
+from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 import os
-import datetime 
+import datetime
 
 
 app = Flask(__name__)
@@ -12,11 +13,14 @@ bcrypt = Bcrypt(app)
 
 host = os.environ.get('DB_URL')
 client = MongoClient(host=host)
+
+# app.config["MONGO_URI"] = "mongodb://localhost:27017/myDatabase"
+
+# mongo = PyMongo(app)
 db = client.notesapp
 notes = db.notes
-users = db.user
-records = db.register
 
+users = db.user
 
 app.secret_key = "bdqsrmf2"
 # app.permanent_session_lifetime = timedelta(minutes=30)
@@ -27,22 +31,26 @@ app.secret_key = "bdqsrmf2"
 ''' SHOW ALL NOTES ------------------------------------------------- '''
 @app.route("/")
 def home():
-    return render_template('index.html', notes=notes.find())
+    return render_template('index.html')
+
 
 
 ''' CREATE NEW NOTE ------------------------------------------------- '''
-@app.route("/notes/new")
+@app.route("/notes/new", methods=['GET'])
 def notes_new():
-    return render_template('notes_new.html', title='New Note')
+    _id = session['_id']
+    return render_template('notes_new.html', title='New Note', _id=_id)
 
 
-''' SUBMIT A NEW PLAYLIST ------------------------------------------------- '''
+''' SUBMIT A NEW NOTE ------------------------------------------------- '''
 @app.route("/notes", methods=['POST'])
 def notes_submit():
+    _id = session['_id']
     note = {
         'name': request.form.get('dname'),
         'content': request.form.get('desc'),
         'created': datetime.datetime.utcnow(),
+        'user_id': _id
     }
     notes.insert_one(note)
     return redirect(url_for('home'))
@@ -55,14 +63,14 @@ def notes_submit():
 #     playlist_comments = comments.find({'playlist_id': playlist_id})
 #     return render_template('playlists_show.html', playlist=playlist, comments=playlist_comments)
 
-''' EDIT A PLAYLIST  '''
+''' EDIT A NOTE  '''
 @app.route("/notes/<notes_id>/edit")
 def notes_edit(notes_id):
     note = notes.find_one({'_id': ObjectId(notes_id)})
     return render_template('notes_edit.html', note=note, title='Edit Playlist')
 
 
-''' SUBMIT THE EDITED PLAYLIST ------------------------------------------------- '''
+''' SUBMIT THE EDITED NOTE ------------------------------------------------- '''
 @app.route("/notes/<notes_id>", methods=['POST'])
 def notes_update(notes_id):
     updated_note = {
@@ -76,7 +84,7 @@ def notes_update(notes_id):
         {'$set': updated_note})
     return redirect(url_for('user', notes_id=notes_id, title='Edit Playlist'))
 
-''' DELETE A PLAYLIST ------------------------------------------------- '''
+''' DELETE A NOTE ------------------------------------------------- '''
 
 @app.route("/notes/<notes_id>/delete", methods=['POST'])
 def notes_delete(notes_id):
@@ -84,50 +92,94 @@ def notes_delete(notes_id):
     notes.delete_one({'_id': ObjectId(notes_id)})
     return redirect(url_for('user'))
 
+
+
+
+
 # USER INFO -----------------------------------------------------------------------------
+
 
 def logged_in():
     return session.get('username') and session.get('password')
+
 def current_user():
-    found_user = users.find_one({
+    found_user = users.find_one ({
         'username':session.get('username'),
         'password':session.get('password')
     })
     return found_user
-
-
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == 'POST':
-        # session.permanent = True
-        user = request.form["nm"]
-        session["user"] = user
-
-
-        flash("Login Successful!")
-        return redirect(url_for("user"))
-    else:
-        if "user" in session:
-            # flash("Already logged in!!")
-            return redirect(url_for("user"))
-
-        return render_template('login.html')
-
+    
 @app.route("/user")
 def user():
     if logged_in:
         user = current_user()
+        _id = session['_id']
 
-        return render_template("user.html", user=user, notes=notes.find())
+        return render_template("user.html", _id=_id, user=user, notes=notes.find({'user_id': _id}).sort([['_id', -1]]))
     else:
         flash("You are not logged in!")
         return redirect(url_for("login"), notes=notes.find())
+        
 
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == 'POST':
+        email = request.form['logname']
+        password = request.form['logpass']
+        user = users.find_one({'username': email})
+        if user:
+            if bcrypt.check_password_hash(user['password'], password):
+                session['email'] = user['username']
+                session['_id'] = str(user['_id'])
+                return redirect(url_for('user'))
+            else:
+                flash("Incorrect username/password")
+            pass 
+        else:
+            flash("Incorrect username/password 2")
+            return render_template('login.html')
+    else:
+        if "email" in session:
+            # flash("Already logged in!!")
+            return redirect(url_for("user"))
+        else:
+            return render_template('login.html')
+
+
+@app.route('/signup')
+def signup():
+    return render_template("signup.html")
+
+@app.route('/signup', methods=['POST'])
+def signup_form():
+    username = request.form.get("usern")
+    password = request.form.get("passw")
+    password_hash = bcrypt.generate_password_hash(password)
+    name = request.form.get("sname")
+
+    found_user = users.find_one({'username':username})
+    if found_user:
+        flash("User already exists")
+        return redirect(url_for('signup'))
+    
+    user = {
+        'username':username,
+        'password':password_hash,
+        'name':name,
+        'created':datetime.datetime.utcnow()
+    }
+
+    users.insert_one(user)
+
+    # session["username"] = user['username']
+    # session["password"] = user['password']
+
+    return redirect(url_for("user"))
 
 @app.route("/logout")
 def logout():
     flash("You have been logged out", "info")
-    session.pop("user", None)
+    session.pop("email", None)
     return redirect(url_for("login"))
 
 
