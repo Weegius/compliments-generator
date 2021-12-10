@@ -55,14 +55,6 @@ def notes_submit():
     notes.insert_one(note)
     return redirect(url_for('home'))
 
-''' SHOW A PLAYLIST ------------------------------------------------- '''
-# @app.route('/playlists/<playlist_id>')  
-# def playlists_show(playlist_id):
-#     """Show a single playlist."""
-#     playlist = playlists.find_one({'_id': ObjectId(playlist_id)})
-#     playlist_comments = comments.find({'playlist_id': playlist_id})
-#     return render_template('playlists_show.html', playlist=playlist, comments=playlist_comments)
-
 ''' EDIT A NOTE  '''
 @app.route("/notes/<notes_id>/edit")
 def notes_edit(notes_id):
@@ -95,9 +87,10 @@ def notes_delete(notes_id):
 
 
 
+# USER -----------------------------------------------------------------------------
 
-# USER INFO -----------------------------------------------------------------------------
 
+'''HELPER FUNCTIONS ---------------------------------------------------------------------- '''
 
 def logged_in():
     return session.get('username') and session.get('password')
@@ -109,6 +102,8 @@ def current_user():
     })
     return found_user
     
+
+
 @app.route("/user")
 def user():
     if logged_in:
@@ -120,6 +115,8 @@ def user():
         flash("You are not logged in!")
         return redirect(url_for("login"), notes=notes.find())
         
+'''LOGIN AND LOGOUT ROUTES -----------------------------------------'''
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -144,6 +141,16 @@ def login():
             return redirect(url_for("user"))
         else:
             return render_template('login.html')
+
+
+@app.route("/logout")
+def logout():
+    flash("You have been logged out", "info")
+    session.pop("email", None)
+    return redirect(url_for("login"))
+
+
+''' REGISTER A USER ---------------------------------------- '''
 
 
 @app.route('/signup')
@@ -176,11 +183,6 @@ def signup_form():
 
     return redirect(url_for("user"))
 
-@app.route("/logout")
-def logout():
-    flash("You have been logged out", "info")
-    session.pop("email", None)
-    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":
