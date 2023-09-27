@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb-data:/data/db
+
+  web:
+    build:
+      context: ./
+    image: weegius/notes_app
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_URL=mongodb+srv://heroku:<password>@cluster0.gerdk.mongodb.net/?retryWrites=true&w=majority
+      - SKEY=o1HM3lo7Snqp4gHM@^93e7g%fe&pgEZ#ep
+    depends_on:
+      - mongodb
+
